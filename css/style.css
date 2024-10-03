@@ -1,0 +1,77 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+h2 {
+    text-align: center;
+}
+
+.poll-container {
+    width: 60%;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.poll-contan {
+    width: 60%;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.poll-container label {
+    display: block;
+    padding: 10px 0;
+    font-size: 18px;
+}
+
+.poll-container input[type="radio"] {
+    margin-right: 10px;
+}
+
+.submit-btn {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background-color: #45a049;
+}
+
+.chart-container {
+    width: 100%;
+    margin-top: 40px;
+}
+
+.bar {
+    background-color: #4CAF50;
+    height: 30px;
+    margin: 5px 0;
+    color: white;
+    text-align: right;
+    padding-right:0;
+    border-radius: 5px;
+}
+
+.bar span {
+    display: inline-block;
+    width: 0%;
+    height: 90%;
+    background-color: #3e8e41;
+    border-radius: 5px;
+    transition: width 1s;
+}
