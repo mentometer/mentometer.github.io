@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll with Chart</title>
+</head>
+<body>
+
+<h2>Truth Or Myth</h2>
+<p id="question" style="text-align:center;padding:0 30% 0 30%">Which is your favorite programming language.</p>
+
+<div class="poll-container" style="display:none">
+    <form id="pollForm">
+        <label>
+            <input id="yes" type="radio" name="language" value="Yes" required> Truth
+        </label>
+        <label>
+            <input id="no" type="radio" name="language" value="No"> Myth
+        </label>
+        <button type="submit" class="submit-btn">Submit</button>
+    </form>
+</div>
+
+<h1 id="greet" style="text-align:center"></h1>
+<p id="explanation" style="text-align:center;width:100%"></p>
+
+<div class="chart-container">
+    <div id="yes-bar" class="bar">Yes <span></span></div>
+    <div class="bar" style="background-color:#00000000"></div>
+    <div id="no-bar" class="bar">No <span></span></div>
+</div>
+
+<script type="module">
+    localStorage.setItem("Qno",localStorage.getItem("Qno") || 0);
+    localStorage.getItem("Submitted",localStorage.getItem("Qno")||"none");
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
+    import {getDatabase, ref, child, get, set, update, remove} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+    const firebaseConfig = {
+        apiKey: "AIzaSyDNBw1U-JyH9Adhhb9yO85s77z5hlT3Y0Q",
+        authDomain: "mentometer-d503a.firebaseapp.com",
+        databaseURL: "https://mentometer-d503a-default-rtdb.firebaseio.com",
+        projectId: "mentometer-d503a",
+        storageBucket: "mentometer-d503a.appspot.com",
+        messagingSenderId: "193786054541",
+        appId: "1:193786054541:web:4adcb1233ed3ef190e9fc4",
+        measurementId: "G-6QQQM9890K"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getDatabase();
+    const dbref = ref(db,"Polls");
+    function addData(name,data){
+        set(child(dbref,name+(new Date()).getTime()),data).catch((error)=>{alert("error")})
+    }
+    function getQuestion(){
+        var qtext = document.getElementById("question");
+        let dbref = ref(db,"Question")
+        var pollcontainer = document.querySelector("div[class='poll-container']")
+        var greet = document.getElementById("greet")
+        var chart = document.querySelector("div[class='chart-container']")
+        var explanation = document.getElementById("explanation")
+        get(dbref).then((snapshot)=>{
+            if(snapshot.exists()){
+                var question = snapshot.val();
+                if(question["qno"]!=localStorage.getItem("Qno")){
+                    qtext.innerText = question["question"]
+                    localStorage.setItem("Qno",question["qno"])
+                    localStorage.setItem("Submitted","none")
+                    pollcontainer.style.display = "inherit"
+                    chart.style.display = "none"
+                    greet.innerText = ""
+                    explanation.innerText =""
+                }else{
+                    if(question["answer"] != "non"){
+                        pollcontainer.style.display = "none"
+                        if(question["answer"] == localStorage.getItem("Submitted")){
+                            greet.innerText = "You answered correct: True"
+                        }else{
+                            greet.innerText = "You answered wrong: Myth"
+                        }
+                        explanation.innerText = question["explanation"]
+                        chart.style.display = "inherit"
+                        updateChart()
+                    }else{
+                        chart.style.display = "none"
+                        greet.innerText = ""
+                        explanation = ""
+                    }
+                    if(localStorage.getItem("Submitted")!="none"){
+                        pollcontainer.style.display = "none"
+                    }
+                }
+            }
+        })
+    }
+    var intval = setInterval(getQuestion,2000);
+    const pollForm = document.getElementById('pollForm');
+    const bars = {
+        'Yes': document.querySelector('#yes-bar span'),
+        'No': document.querySelector('#no-bar span')
+    };
+
+    let pollResults = JSON.parse(localStorage.getItem('pollResults')) || {
+        'Yes': 0,
+        'No': 0
+    };
+
+    function updateChart() {
+        let dbref = ref(db,"Polls")
+        var total = 0;
+        var yes =0;
+        var no = 0;
+        get(dbref).then((snapshot)=>{
+            if(snapshot.exists()){
+                var poll = snapshot.val();
+                total = Object.keys(poll).length;
+                for(var i in poll){
+                    if(poll[i]=="Yes"){
+                        yes++;
+                    }else if(poll[i]=="No"){
+                        no++;
+                    }
+                }
+                bars["Yes"].style.width = (yes*100/total)+"%"
+                bars["Yes"].textContent = Math.round(yes*100/total)+"%"
+                bars["No"].textContent = Math.round(no*100/total)+"%"
+                bars["No"].style.width = (no*100/total)+"%"
+            }
+        })
+    }
+
+    function nameAquire(){
+        if(!localStorage.getItem("nameCyber")){
+            var name = prompt("Enter your name:");
+            if(name == null || name == ""){
+                nameAquire();
+            }else{
+                localStorage.setItem("nameCyber",name);
+            }
+        }
+    }
+
+    pollForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const formData = new FormData(pollForm);
+        const selectedLanguage = formData.get('language');
+        addData(localStorage.getItem("nameCyber") || "",formData.get('language'));
+        var pollcontainer = document.querySelector("div[class='poll-container']")
+        pollcontainer.style.display = "none"
+        localStorage.setItem("Submitted",formData.get("language"))
+        pollResults[selectedLanguage]++;
+
+        localStorage.setItem('pollResults', JSON.stringify(pollResults));
+
+        updateChart();
+    });
+
+    updateChart();
+</script>
+
+</body>
+</html>
